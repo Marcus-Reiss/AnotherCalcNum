@@ -40,6 +40,9 @@ int main () {
     }
     cout << endl << "qtde de +: " << conta << endl;
 
+    string h = "tlator";
+    cout << endl << h.replace(1,1,"r").append("vrum") << endl;
+
     system("pause");
     return 0;
 }
