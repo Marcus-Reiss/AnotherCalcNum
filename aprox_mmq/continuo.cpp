@@ -17,12 +17,14 @@ class caso_continuo {
         float xi, xf, inte;
         string xixf, vint[2], xixf_aux;
         int vin_aux[10], vint_t[2], sinal;
-        bool fst, snd, both, exist; 
+        bool fst, snd, both, exist;
+        float ak[6], bk[4], abcd[4];
+        string pint;         
     public:
         caso_continuo () {
             cout << "Escreva a funcao a ser aproximada (polinomio, sem espacos e sem sinais negativos):" << endl;
             cout << ">> ";
-            //cin >> pol;
+            cin >> pol;
             cout << "Delimite o intervalo ([xi,xf]): ";
             cin >> xixf;
             fst = snd = both = exist = false;
@@ -34,56 +36,33 @@ class caso_continuo {
             "[2] Polinomio personalizado" << endl;
             cout << ">> ";
             cin >> resp;
-            // resposta();
-            integral(pol);
+            resposta();
+            //integral(pol);
         }        
         void polinomio_tipico () {
             cout << endl <<  "Grau do polinomio (ate 3): ";
             cin >> grau;
-            calcula1();
-            if (grau == 2)
-                calcula2();
-            else if (grau > 2)
-                calcula3();
+            calcula();
         }
         void polinomio_personalizado () {
 
         }
-        void integral (string f) { // Parte-se do pressuposto que se quer integrar um polinômio MUDAR PARA FLOAT
-            n_termos(f);
-            int c = -1;
+        float integral (string f, int incr) { // Parte-se do pressuposto que se quer integrar um polinômio
+            n_termos(f);            
             for (int k = 0; k < numt; k++) {
                 vcoef[k] = f.substr(vpos_plus[k] + 1, vpos_ast[k] - (vpos_plus[k] + 1));
                 vexp[k]  = f.substr(vpos_ast[k] + 3, 1); // Considerando expoentes na casa das unidades
-            }
-            sinal = xixf.find('-');
-            if (sinal == string::npos) { // sem sinal
-                vint[0] = xixf.substr(1, xixf.find(',') - 1);
-                vint[1] = xixf.substr(xixf.find(',') + 1, xixf.length() -1 - (xixf.find(',') + 1));
-            } else {
-                cout << "AOBA"; // teste
-                exist = true;
-                xixf_aux = xixf;
-                if (xixf_aux.replace(sinal,1,"hey").find('-') != string::npos) { // dois sinais
-                    cout << "AOBA"; //teste
-                    both = true;
-                    vint[0] = xixf.substr(2, xixf.find(',') - 2);
-                    vint[1] = xixf.substr(xixf.find(',') + 2, xixf.length() -1 - (xixf.find(',') + 2));
-                } else if (sinal < xixf.find(',')) { // um sinal antes da vírgula
-                    fst = true;
-                    vint[0] = xixf.substr(2, xixf.find(',') - 2);
-                    vint[1] = xixf.substr(xixf.find(',') + 1, xixf.length() -1 - (xixf.find(',') + 1));
-                } else { // um sinal depois da vírgula
-                    snd = true;
-                    vint[0] = xixf.substr(1, xixf.find(',') - 1);
-                    vint[1] = xixf.substr(xixf.find(',') + 2, xixf.length() -1 - (xixf.find(',') + 2));
-                }                             
-            }
+            }            
+            analisa_sinal();            
             transforma(exist,fst,snd,both);
+            for (int k = 0; k < numt; k++) {
+                vexp_t[k] += incr;
+            }
             inte = 0;
-            //for (int i = 0; i < numt; i++) {
-            //    inte += vcoef[i]*pow((xf - xi), vexp[i] + 1)/(vexp[i] + 1);
-            //}            
+            for (int i = 0; i < numt; i++) {
+                inte += vcoef_t[i]*(pow(xf, vexp_t[i] + 1) - pow(xi, vexp_t[i] + 1))/(vexp_t[i] + 1);
+            }
+            return (inte);            
         }
         void n_termos (string f) { // f é da forma "8*x^0+1*x^2+3*x^1+24*x^7" (exemplo)
             pos = cont = 0;
@@ -153,24 +132,57 @@ class caso_continuo {
                     vint_t[1] *= -1;
                 } else {
                     vint_t[0] *= -1;
-                    vint_t[1] *= -1;
-                }                
+                    vint_t[1] *= -1;}                
             }
-            // impressão
-            cout << endl << "intervalo: ";
-            for (int n = 0; n < 2; n++)
-                cout << vint_t[n] << " ";
-            cout << endl;            
+            xi = vint_t[0];
+            xf = vint_t[1];            
         }
-        void calcula1 () {
 
+        void analisa_sinal () {
+            sinal = xixf.find('-');
+            if (sinal == string::npos) { // sem sinal                
+                vint[0] = xixf.substr(1, xixf.find(',') - 1);
+                vint[1] = xixf.substr(xixf.find(',') + 1, xixf.length() -1 - (xixf.find(',') + 1));
+            } else {                
+                exist = true;
+                xixf_aux = xixf;
+                if (xixf_aux.replace(sinal,1,"hey").find('-') != string::npos) { // dois sinais                    
+                    both = true;
+                    vint[0] = xixf.substr(2, xixf.find(',') - 2);
+                    vint[1] = xixf.substr(xixf.find(',') + 2, xixf.length() -1 - (xixf.find(',') + 2));
+                } else if (sinal < xixf.find(',')) { // um sinal antes da vírgula
+                    fst = true;
+                    vint[0] = xixf.substr(2, xixf.find(',') - 2);
+                    vint[1] = xixf.substr(xixf.find(',') + 1, xixf.length() -1 - (xixf.find(',') + 1));
+                } else { // um sinal depois da vírgula
+                    snd = true;
+                    vint[0] = xixf.substr(1, xixf.find(',') - 1);
+                    vint[1] = xixf.substr(xixf.find(',') + 2, xixf.length() -1 - (xixf.find(',') + 2));
+                }                             
+            }
+        }                      
+        
+        void calcula () {
+            pint = "1*x^0"; // matriz A
+            for (int i = 0; i < 6; i++) {
+                ak[i] = integral(pint, i);
+            }
+            for (int j = 0; j < 4; j++) {
+                bk[j] = integral(pol, j);
+            }
+            resolve_sistema();                                      
         }
-        void calcula2 () {
 
+        void resolve_sistema () {
+            if (grau == 1) {
+
+            } else if (grau == 2) {
+
+            } else {
+                
+            }
         }
-        void calcula3 () {
-
-        }        
+               
         void resposta () {
             if (resp == 1)
                 polinomio_tipico();
