@@ -18,8 +18,8 @@ class caso_continuo {
         string xixf, vint[2], xixf_aux;
         int vin_aux[10], vint_t[2], sinal;
         bool fst, snd, both, exist;
-        float ak[6], bk[4], abcd[4];
-        string pint;         
+        float ak[4], bk[3], a, b, c;
+        string pint, p1modelo, p2modelo;         
     public:
         caso_continuo () {
             cout << "Escreva a funcao a ser aproximada (polinomio, sem espacos e sem sinais negativos):" << endl;
@@ -31,21 +31,12 @@ class caso_continuo {
             menu();
         }
         void menu () {
-            cout << "Escolha o tipo de aproximacao:" << endl;
-            cout << "[1] Polinomio tipico (grau a ser escolhido)" << "\t" << 
-            "[2] Polinomio personalizado" << endl;
+            cout << "Escolha o grau do polinomio de aproximacao:" << endl;
+            cout << "[1] Polinomio do primeiro grau" << "\t" << 
+            "[2] Polinomio do segundo grau" << endl;
             cout << ">> ";
-            cin >> resp;
-            resposta();
-            //integral(pol);
-        }        
-        void polinomio_tipico () {
-            cout << endl <<  "Grau do polinomio (ate 3): ";
             cin >> grau;
             calcula();
-        }
-        void polinomio_personalizado () {
-
         }
         float integral (string f, int incr) { // Parte-se do pressuposto que se quer integrar um polinômio
             n_termos(f);            
@@ -164,31 +155,40 @@ class caso_continuo {
         
         void calcula () {
             pint = "1*x^0"; // matriz A
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 4; i++) {
                 ak[i] = integral(pint, i);
             }
-            for (int j = 0; j < 4; j++) {
+            for (int j = 0; j < 3; j++) {
                 bk[j] = integral(pol, j);
             }
             resolve_sistema();                                      
         }
 
         void resolve_sistema () {
+            float a0, a1, a2, a3, a4, b1, b2, b3, t1, t2;
+            a0 = ak[0]; a1 = ak[1]; a2 = ak[2]; a3 = ak[3]; a4 = ak[4];
+            b1 = bk[0]; b2 = bk[1]; b3 = bk[2];
             if (grau == 1) {
-
-            } else if (grau == 2) {
-
+                a = (a1*b2 - a2*b1)/(pow(a1,2) - a0*a2);
+                b = (b1 - a0*a)/a1;
             } else {
-                
+                t1 = (a2*b3 - a3*b2)*(a2*a0 - pow(a1,2)) - (pow(a2,2) - a1*a3)*(a2*b1 - a1*b2);
+                t2 = (a4*a2 - pow(a3,2))*(a2*a0 - pow(a1,2)) - pow((pow(a2,2) - a1*a3), 2);
+                c  = t1/t2;
+                a  = (a2*b1 - a1*b2 - (pow(a2,2) - a1*a3)*c)/(a2*a0 - pow(a1,2));
+                b  = (b2 - a1*a - a3*c)/a2;
             }
+            imprime_polinomio();
         }
-               
-        void resposta () {
-            if (resp == 1)
-                polinomio_tipico();
-            else
-                polinomio_personalizado();
-        }
+
+        void imprime_polinomio () {
+            cout << endl << "Polinomio aproximador: ";
+            if (grau == 1) {
+                cout << a << " + " << b << "x" << endl;                
+            } else {
+                cout << a << " + " << b << "x + " << c << "x^2" << endl;
+            }
+        }        
 };
 
 int main () {
