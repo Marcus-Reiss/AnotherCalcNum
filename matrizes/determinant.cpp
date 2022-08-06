@@ -24,6 +24,8 @@ int main () {
 
     cout << "det(M) = " << det << endl << endl;
 
+    delete[] m;
+
     system("pause");
     return 0;
 }
@@ -78,5 +80,6 @@ float determinant (int n, float *m) {
             det += pow(-1, 2 + k)*(*(m + k))*partial_det;
         }        
         return (det);
+        delete[] q;
     }
 }
