@@ -3,12 +3,13 @@
 #include <cmath>
 using namespace std;
 
-void set_matrix   (int n, float *m);
-void print_matrix (int n, float *m);
-float determinant (int n, float *m);
-bool is_singular  (int n, float *m);
-void transposes   (int n, float *cofac, float *trans);
-void set_inverse  (int n, float *m, float *inv);
+void set_matrix    (int n, float *m);
+void print_matrix  (int n, float *m);
+float determinant  (int n, float *m);
+bool is_singular   (int n, float *m);
+void transposes    (int n, float *cofac, float *trans);
+void set_inverse   (int n, float *m, float *inv);
+void print_inverse (int n, float *inv);
 
 int main () {
     int n;
@@ -29,8 +30,7 @@ int main () {
         set_inverse(n, m, inv);        
     }
 
-    delete[] m;
-    delete[] inv;    
+    delete[] m;        
 
     system("pause");
     return 0;
@@ -94,28 +94,6 @@ bool is_singular (int n, float *m) {
     return (det == 0 ? true : false);
 }
 
-void transposes (int n, float *cofac, float *trans) {
-    int k, l;
-    k = l = 0;
-    for (int j = 0; j < n; j++) {
-        for (int i = 0; i < n; i++) {
-            cout << *(cofac + i*n + j) << endl; // teste
-            *(trans + k*n + l) = *(cofac + i*n + j);
-            l++;
-        }
-        k++;
-        l = 0;
-    }
-    cout << "transposed:" << endl;
-    for (int y = 0; y < n; y++) {
-        for (int z = 0; z < n; z++) {
-            cout << *trans << " ";
-            trans++;
-        }
-        cout << endl;
-    }
-}
-
 void set_inverse (int n, float *m, float *inv) {
     float *cofac, *fewer, *trans;
     int nn = n - 1, g, h;
@@ -123,6 +101,7 @@ void set_inverse (int n, float *m, float *inv) {
     fewer = new float[nn*nn];
     trans = new float[n*n];
     g = h = 0;
+    
     for (int li = 0; li < n; li++) {
         for (int k = 0; k < n; k++) {
             for (int i = 0; i < n; i++) {
@@ -141,15 +120,46 @@ void set_inverse (int n, float *m, float *inv) {
             g = h = 0;
         }
     }
-    cout << "cofac:" << endl;
-    for (int y = 0; y < n; y++) {
-        for (int z = 0; z < n; z++) {
-            cout << *cofac << " ";
-            cofac++;
+    
+    transposes(n,cofac,trans);
+
+    float det = determinant(n,m);
+    for (int k = 0; k < n; k++) {
+        for (int l = 0; l < n; l++) {
+            *(inv + k*n + l) = (*trans)/det;
+            trans++;
+        }
+    }    
+    
+    delete[] cofac;
+    delete[] fewer;  
+
+    print_inverse(n,inv);        
+}
+
+void transposes (int n, float *cofac, float *trans) {
+    int k, l;
+    k = l = 0;
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {           
+            *(trans + k*n + l) = *(cofac + i*n + j);            
+            l++;
+        }
+        k++;
+        l = 0;
+    }       
+}
+
+void print_inverse (int n, float *inv) {
+    cout << endl << "Inverse matrix:" << endl;
+    for (int k = 0; k < n; k++) {
+        for (int l = 0; l < n; l++) {
+            cout << *inv << " ";
+            inv++;
         }
         cout << endl;
     }
-    transposes(n,cofac,trans);
-    delete[] cofac;
-    delete[] fewer;    
+    cout << endl;
+
+    delete[] inv;
 }
