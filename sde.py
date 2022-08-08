@@ -17,13 +17,21 @@ def coeff(div):
     for term in div:
         if '^2' in term:
             if '*' in term:
-                a = float(term.replace('*x^2',''))
+                term = term.replace('*x^2','')
             else:
-                a = float(term.replace('x^2',''))
+                term = term.replace('x^2','')
+            if term == '':
+                a = 1
+            else:
+                a = float(term)
         else:
             for t in ft:
                 if t in term:
-                    b = float(term.replace(t,''))
+                    term = term.replace(t,'')
+                    if term == '':
+                        b = 1
+                    else:
+                        b = float(term)
                     isb = lin = True
                     break
             if not isb:
